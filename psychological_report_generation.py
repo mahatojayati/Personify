@@ -13,10 +13,15 @@ network = pylast.LastFMNetwork(api_key=LASTAPI_KEY, api_secret=LASTFM_SECRET)
 client = genai.Client(api_key=GEMINI_KEY)
 
 def get_musical_summary(username):
-    """Fetches user tags and generates a psychological report via Gemini."""
+    # Check if keys are actually loaded before proceeding
+    if not all([LASTAPI_KEY, LASTFM_SECRET, GEMINI_KEY]):
+        return "Error: API keys are missing. Please configure Streamlit Secrets."
+    
     try:
+        network = pylast.LastFMNetwork(api_key=LASTAPI_KEY, api_secret=LASTFM_SECRET)
+        client = genai.Client(api_key=GEMINI_KEY)
+        
         user = network.get_user(username)
-        # Fetching top 15 tracks to get a broader data sample
         top_tracks = user.get_top_tracks(limit=15)
         
         if not top_tracks:
