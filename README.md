@@ -1,49 +1,42 @@
-# Personify
-# 🎶 Musical Psychology Mirror
+# 🎶 Musical Psychology Mirror (Personify)
 
-An AI-powered application that analyzes your Last.fm listening habits to generate a psychological profile based on the **Big Five (OCEAN) Personality Traits**.
-
-
-
-[Image of the Big Five Personality Traits (OCEAN)]
-
+An AI-driven application that interprets Last.fm listening habits through the lens of the **Big Five (OCEAN)** personality framework.
 
 ## ✨ Features
-- **Last.fm Integration**: Fetches your top tracks and associated genre tags.
-- **Gemini 2.0 Flash**: Uses advanced LLM reasoning to map musical patterns to psychological insights.
-- **OCEAN Framework**: Provides a breakdown of Openness, Conscientiousness, Extraversion, Agreeableness, and Neuroticism.
-- **Secure Architecture**: Built for Streamlit Cloud with hidden API secrets.
+- **Data-Driven**: Analyzes track-level genre tags from Last.fm.
+- **Advanced AI**: Uses **Gemini 2.0 Flash** for high-reasoning psychological profiling.
+- **Secure**: Implements Streamlit Secrets to keep API keys private.
 
-## 🚀 Getting Started
+## 🚀 Setup Instructions
 
-### Prerequisites
-- Python 3.9+
-- A [Last.fm API Key](https://www.last.fm/api/account/create)
-- A [Google Gemini API Key](https://aistudio.google.com/)
-
-### Installation
-1. **Clone the repository:**
+1. **Clone the Project**:
    ```bash
-   git clone [https://github.com/yourusername/musical-psychology-mirror.git](https://github.com/yourusername/musical-psychology-mirror.git)
-   cd musical-psychology-mirror
+   git clone [https://github.com/yourusername/personify.git](https://github.com/yourusername/personify.git)
+   cd personify
 
-2. Install Dependencies
-   pip install -r requirements.txt
+2. Configure Secrets: Since .streamlit/ is hidden, create it via terminal:
 
-3. Set up Secrets: Create a .streamlit/secrets.toml file and add your credentials:
-LASTFM_API_KEY = "your_key"
-LASTFM_API_SECRET = "your_secret"
-GEMINI_API_KEY = "your_gemini_key"
+Bash
 
-4. Run the App:
-   Streamlit - run web_interface.py
+mkdir .streamlit
+touch .streamlit/secrets.toml 
 
- 🛠️ Tech Stack
-Frontend: Streamlit
+3. Install & Run:
 
-Music Data: pylast (Last.fm API wrapper)
+Bash
 
-AI Model: Google Gemini 2.0 Flash
+pip install -r requirements.txt
+streamlit run web_interface.py
 
-🔒 Security Note
-This project uses .gitignore to prevent secrets.toml from being uploaded to GitHub.
+4. 🧠 The Framework
+The analysis maps music to the OCEAN model:
+
+Openness to experience
+
+Conscientiousness
+
+Extraversion
+
+Agreeableness
+
+Neuroticism
