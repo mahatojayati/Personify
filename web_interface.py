@@ -27,3 +27,16 @@ if st.button("Generate Analysis"):
             
             st.divider()
             st.caption("Disclaimer: This tool is for entertainment and self-reflection purposes.")
+            # Temporary debug tool - add to the bottom of web_interface.py
+with st.sidebar:
+    if st.button("Check Gemini Connection"):
+        try:
+            from google import genai
+            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+            response = client.models.generate_content(
+                model="gemini-2.0-flash", 
+                contents="Say 'Connection Successful!'"
+            )
+            st.success(response.text)
+        except Exception as e:
+            st.error(f"Connection failed: {e}")
