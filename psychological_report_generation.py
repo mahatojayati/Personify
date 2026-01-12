@@ -3,19 +3,21 @@ import pylast
 from google import genai
 from google.genai import types
 
-# Load credentials from Streamlit Secrets
-LASTAPI_KEY = st.secrets["LASTFM_API_KEY"]
-LASTFM_SECRET = st.secrets["LASTFM_API_SECRET"]
-GEMINI_KEY = st.secrets["GEMINI_API_KEY"]
+import streamlit as st
+import tomllib  # Or 'import toml' if on Python < 3.11
+import os
 
-# Initialize clients
-network = pylast.LastFMNetwork(api_key=LASTAPI_KEY, api_secret=LASTFM_SECRET)
-client = genai.Client(api_key=GEMINI_KEY)
+# Manual path to your secrets
+secrets_path = os.path.join("config", "secrets.toml")
 
-def get_musical_summary(username):
-    # Check if keys are actually loaded before proceeding
-    if not all([LASTAPI_KEY, LASTFM_SECRET, GEMINI_KEY]):
-        return "Error: API keys are missing. Please configure Streamlit Secrets."
+if os.path.exists(secrets_path):
+    with open(secrets_path, "rb") as f:
+        config = tomllib.load(f)
+    LASTAPI_KEY = config.get("LASTFM_API_KEY")
+    LASTFM_SECRET = config.get("LASTFM_API_SECRET")
+    GEMINI_KEY = config.get("GEMINI_API_KEY")
+else:
+    st.error("Could not find config/secrets.toml")
     
     try:
         network = pylast.LastFMNetwork(api_key=LASTAPI_KEY, api_secret=LASTFM_SECRET)
