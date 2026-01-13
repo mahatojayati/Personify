@@ -39,9 +39,9 @@ def get_musical_summary(username):
         sorted_tags = sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)      
         tag_string = ", ".join([f"{tag} ({count})" for tag, count in sorted_tags[:15]])
         
-        # Generate the structured report using Gemini 2.0 Flash
+        # Generate the structured report using Gemini 1.5 Flash
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-1.5-flash",
             config=types.GenerateContentConfig(
                 system_instruction=(
                     "You are a Music Psychologist. Analyze music tags using the Big Five (OCEAN) framework. "
