@@ -41,7 +41,7 @@ def get_musical_summary(username):
         
         # Generate the structured report using Gemini 1.5 Flash
         response = client.models.generate_content(
-            model="gemini-1.5-flash",
+            model="gemini-2.0-flash",
             config=types.GenerateContentConfig(
                 system_instruction=(
                     "You are a Music Psychologist. Analyze music tags using the Big Five (OCEAN) framework. "
