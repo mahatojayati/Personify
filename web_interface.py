@@ -11,7 +11,7 @@ st.markdown("""
 """)
 
 # User Input
-target_user = st.text_input("Last.fm Username", value="", placeholder="Enter username (Username)")
+target_user = st.text_input("Last.fm Username", value="", placeholder="Enter username")
 
 if st.button("Generate Analysis"):
     if not target_user:
@@ -34,7 +34,7 @@ with st.sidebar:
             from google import genai
             client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
             response = client.models.generate_content(
-                model="gemini-1.5-flash", 
+                model="gemini-2.0-flash", 
                 contents="Say 'Connection Successful!'"
             )
             st.success(response.text)
