@@ -1,5 +1,4 @@
 streamlit
 pylast
-google-genai
-plotly
+groq
 pandas
