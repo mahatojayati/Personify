@@ -29,6 +29,13 @@ if st.button("Generate My Analysis"):
             st.divider()
             st.markdown("### 📊 Your Psychological Profile")
             st.markdown(report)
+            # In your Streamlit code:
+st.divider()
+st.subheader("Was this report accurate?")
+accuracy_rating = st.slider("Rate the psychological insight (1-5):", 1, 5)
+if st.button("Submit Feedback"):
+    # Save accuracy_rating to your database (MongoDB/CSV)
+    st.success("Thank you! This helps improve the model's accuracy.")
             
             # --- Footer and Feedback ---
             st.divider()
