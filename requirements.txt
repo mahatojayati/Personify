@@ -1,4 +1,4 @@
 streamlit
 pylast
-groq
+openai
 pandas
