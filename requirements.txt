@@ -1,4 +1,4 @@
 streamlit
 pylast
-openai
-pandas
+google-genai
+st-supabase-connection
