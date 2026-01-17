@@ -4,6 +4,10 @@ from openai import OpenAI
 import streamlit as st
 from st_supabase_connection import SupabaseConnection
 
+# Initialize the connection. 
+# This handles secrets retrieval and caching for you.
+conn = st.connection("supabase", type=SupabaseConnection)
+
 # Initialize Supabase Connection
 # This automatically looks for [connections.supabase] in your secrets.toml
 conn = st.connection("supabase", type=SupabaseConnection)
