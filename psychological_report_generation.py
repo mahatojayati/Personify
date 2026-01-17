@@ -1,58 +1,60 @@
 import streamlit as st
 import pylast
-from google import genai
-from google.genai import types
+from openai import OpenAI
 
-# Load credentials from Streamlit Secrets
-LASTAPI_KEY = st.secrets["LASTFM_API_KEY"]
-LASTFM_SECRET = st.secrets["LASTFM_API_SECRET"]
-GEMINI_KEY = st.secrets["GEMINI_API_KEY"]
-
-# Initialize clients
-network = pylast.LastFMNetwork(api_key=LASTAPI_KEY, api_secret=LASTFM_SECRET)
-client = genai.Client(api_key=GEMINI_KEY)
+# Load credentials
+LASTAPI_KEY = st.secrets.get("LASTFM_API_KEY")
+LASTFM_SECRET = st.secrets.get("LASTFM_API_SECRET")
+GITHUB_TOKEN = st.secrets.get("GITHUB_TOKEN")
 
 def get_musical_summary(username):
-    """Fetches user tags and generates a psychological report via Gemini."""
+    if not all([LASTAPI_KEY, LASTFM_SECRET, GITHUB_TOKEN]):
+        return "⚠️ Configuration Error: API keys missing."
+
     try:
+        # --- Last.fm Logic ---
+        network = pylast.LastFMNetwork(api_key=LASTAPI_KEY, api_secret=LASTFM_SECRET)
         user = network.get_user(username)
-        # Fetching top 15 tracks to get a broader data sample
         top_tracks = user.get_top_tracks(limit=15)
         
         if not top_tracks:
-            return "No listening history found for this user. Please ensure the profile is public."
+            return f"No listening history found for user '{username}'."
 
         tag_counts = {}
         for item in top_tracks:
-            # item.item refers to the Track object in pylast
-            tags = item.item.get_top_tags(limit=5)
+            tags = item.item.get_top_tags(limit=3)
             for tag in tags:
                 name = tag.item.get_name().lower()
                 tag_counts[name] = tag_counts.get(name, 0) + 1
         
-        # Sort and format top tags for the prompt
-        sorted_tags = sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)      
-        tag_string = ", ".join([f"{tag} ({count})" for tag, count in sorted_tags[:15]])
+        tag_string = ", ".join([f"{tag} ({count})" for tag, count in sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)[:10]])
         
-        # Generate the AI report
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",
-            config=types.GenerateContentConfig(
-                system_instruction=(
-                    "You are a Music Psychologist. Analyze music tags using the Big Five (OCEAN) framework. "
-                    "Provide a supportive, insightful report with clear sections for: "
-                    "1. Summary, 2. The Five Pillars (OCEAN Scores), and 3. Emotional Regulation Style."
-                ),
-                temperature=0.7,
-            ),
-            contents=f"Analyze these music tags and listening patterns: {tag_string}"
+        # --- GitHub Models Logic ---
+        client = OpenAI(
+            base_url="https://models.inference.ai.azure.com",
+            api_key=GITHUB_TOKEN,
         )
-        return response.text
+        
+        # CHANGED: Using gpt-4o-mini for better reliability and quota
+        response = client.chat.completions.create(
+            model="gpt-4o-mini", 
+            messages=[
+                {
+                    "role": "system", 
+                    "content": "You are a Music Psychologist. Analyze these tags using the OCEAN personality framework."
+                },
+                {"role": "user", "content": f"Tags: {tag_string}"}
+            ],
+            temperature=0.7,
+        )
+        
+        return response.choices[0].message.content
 
-    except pylast.PyLastError as e:
-        return f"Last.fm Error: {e}. Check if the username exists."
     except Exception as e:
-        return f"An error occurred: {str(e)}"
+        # Catch the "Unknown model" error specifically to give feedback
+        if "unknown_model" in str(e):
+            return "❌ Model Error: The selected model ID is incorrect. Try 'gpt-4o-mini' or 'meta/llama-3.3-70b'."
+        return f"❌ Technical Error: {str(e)}"
     
     import streamlit as st
 from st_supabase_connection import SupabaseConnection
