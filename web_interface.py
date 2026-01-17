@@ -6,7 +6,7 @@ st.set_page_config(page_title="Personify | Music Psychology", page_icon="🎶", 
 st.title("🎶 Musical Psychology Mirror")
 st.markdown("Discover your personality through your musical DNA. Powered by GitHub Models & Supabase.")
 
-target_user = st.text_input("Last.fm Username", placeholder="e.g., rj")
+target_user = st.text_input("Last.fm Username", placeholder="enter your username.")
 
 if st.button("Generate My Analysis"):
     if not target_user:
