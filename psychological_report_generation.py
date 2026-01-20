@@ -63,3 +63,16 @@ def get_musical_summary(username):
 
     except Exception as e:
         return f"An error occurred: {str(e)}"
+        def save_to_supabase(username, report, tags, user_id=None):
+    """Inserts findings with the authenticated user's ID."""
+    try:
+        data = {
+            "username": username,
+            "ocean_report": report,
+            "tags_analyzed": tags,
+            "user_id": user_id  # Associate the finding with the logged-in user
+        }
+        conn.table("musical_findings").insert(data).execute()
+        return True
+    except Exception as e:
+        return False
