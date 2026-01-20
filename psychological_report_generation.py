@@ -9,13 +9,13 @@ LASTFM_SECRET = st.secrets["LASTFM_API_SECRET"]
 GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
 
 # Initialize connections
+# 'conn' must be defined here so it can be imported by web_interface.py
 network = pylast.LastFMNetwork(api_key=LASTAPI_KEY, api_secret=LASTFM_SECRET)
 conn = st.connection("supabase", type=SupabaseConnection)
 
 def get_musical_summary(username):
     """Fetches user tags and generates a report via GitHub Models."""
     try:
-        # 1. Fetch data from Last.fm
         user = network.get_user(username)
         top_tracks = user.get_top_tracks(limit=15)
         
@@ -32,7 +32,7 @@ def get_musical_summary(username):
         sorted_tags = sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)      
         tag_string = ", ".join([f"{tag} ({count})" for tag, count in sorted_tags[:10]])
         
-        # 2. Generate AI Report via GitHub Models (OpenAI Client)
+        # Initialize GitHub Models Client (OpenAI-compatible)
         client = OpenAI(
             base_url="https://models.inference.ai.azure.com",
             api_key=GITHUB_TOKEN,
@@ -48,7 +48,7 @@ def get_musical_summary(username):
         )
         report_text = response.choices[0].message.content
 
-        # 3. Store Findings in Supabase
+        # Attempt to save to Supabase
         try:
             data = {
                 "username": username,
@@ -63,16 +63,3 @@ def get_musical_summary(username):
 
     except Exception as e:
         return f"An error occurred: {str(e)}"
-        def save_to_supabase(username, report, tags, user_id=None):
-    """Inserts findings with the authenticated user's ID."""
-    try:
-        data = {
-            "username": username,
-            "ocean_report": report,
-            "tags_analyzed": tags,
-            "user_id": user_id  # Associate the finding with the logged-in user
-        }
-        conn.table("musical_findings").insert(data).execute()
-        return True
-    except Exception as e:
-        return False
