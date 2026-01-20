@@ -3,14 +3,6 @@ import pylast
 from openai import OpenAI
 from st_supabase_connection import SupabaseConnection
 
-try:
-    conn = st.connection("supabase", type=SupabaseConnection)
-    # Simple check to fetch one row from your table
-    test = conn.table("musical_findings").select("*").limit(1).execute()
-    st.success("✅ Connection Successful!")
-except Exception as e:
-    st.error(f"❌ Connection still failing: {e}")
-
 # Load credentials from Streamlit Secrets
 LASTAPI_KEY = st.secrets["LASTFM_API_KEY"]
 LASTFM_SECRET = st.secrets["LASTFM_API_SECRET"]
@@ -71,13 +63,3 @@ def get_musical_summary(username):
 
     except Exception as e:
         return f"An error occurred: {str(e)}"
-        def get_recent_findings(limit=10):
-    """Fetches the most recent psychological reports from Supabase."""
-    try:
-        # Query the table using the st.connection interface
-        # We set ttl="1m" to cache results for 1 minute to save on API calls
-        response = conn.table("musical_findings").select("*").order("created_at", desc=True).limit(limit).execute()
-        return response.data
-    except Exception as e:
-        st.error(f"Could not retrieve history: {e}")
-        return []
