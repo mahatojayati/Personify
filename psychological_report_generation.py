@@ -71,3 +71,13 @@ def get_musical_summary(username):
 
     except Exception as e:
         return f"An error occurred: {str(e)}"
+        def get_recent_findings(limit=10):
+    """Fetches the most recent psychological reports from Supabase."""
+    try:
+        # Query the table using the st.connection interface
+        # We set ttl="1m" to cache results for 1 minute to save on API calls
+        response = conn.table("musical_findings").select("*").order("created_at", desc=True).limit(limit).execute()
+        return response.data
+    except Exception as e:
+        st.error(f"Could not retrieve history: {e}")
+        return []
