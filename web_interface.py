@@ -11,7 +11,7 @@ st.markdown("""
 """)
 
 # User Input
-target_user = st.text_input("Last.fm Username", value="", placeholder="e.g., rj")
+target_user = st.text_input("Last.fm Username", value="", placeholder="Username")
 
 if st.button("Generate My Analysis"):
     if not target_user:
