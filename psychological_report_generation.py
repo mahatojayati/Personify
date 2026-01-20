@@ -3,6 +3,14 @@ import pylast
 from openai import OpenAI
 from st_supabase_connection import SupabaseConnection
 
+try:
+    conn = st.connection("supabase", type=SupabaseConnection)
+    # Simple check to fetch one row from your table
+    test = conn.table("musical_findings").select("*").limit(1).execute()
+    st.success("✅ Connection Successful!")
+except Exception as e:
+    st.error(f"❌ Connection still failing: {e}")
+
 # Load credentials from Streamlit Secrets
 LASTAPI_KEY = st.secrets["LASTFM_API_KEY"]
 LASTFM_SECRET = st.secrets["LASTFM_API_SECRET"]
