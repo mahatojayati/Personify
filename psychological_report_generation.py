@@ -15,7 +15,7 @@ def get_musical_summary(username):
             api_secret=st.secrets["LASTFM_API_SECRET"]
         )
         user = network.get_user(username)
-        top_tracks = user.get_top_tracks(limit=15)
+        top_tracks = user.get_top_tracks(limit=5)
         
         if not top_tracks:
             return "No public listening history found. Is the username correct and public?"
