@@ -11,7 +11,7 @@ st.title("🎶 Musical Psychology Mirror")
 tab_analyze, tab_history = st.tabs(["🔍 Analyzer", "📜 History"])
 
 with tab_analyze:
-    st.markdown("### Discover your personality through your music.")
+    st.markdown("### Discover your personality through your musical DNA.")
     user_input = st.text_input("Last.fm Username", placeholder="e.g., rj")
 
     if st.button("Generate Analysis"):
@@ -29,7 +29,6 @@ with tab_history:
     
     if history_data:
         df = pd.DataFrame(history_data)
-        # Displaying key columns in a table
         st.dataframe(
             df[["username", "tags_analyzed", "ocean_report"]],
             use_container_width=True,
