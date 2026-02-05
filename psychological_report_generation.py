@@ -48,7 +48,6 @@ def get_musical_summary(username):
                     "content": (
                         "You are a professional Music Psychologist. Analyze the user's personality "
                         "using the Big Five (OCEAN) framework based on their music tags. "
-                        "Give a conclusive report based on the Big Five (OCEAN) framework."
                     )
                 },
                 {"role": "user", "content": f"Analyze these musical patterns and tags: {tag_string}"}
