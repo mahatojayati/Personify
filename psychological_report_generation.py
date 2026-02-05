@@ -43,14 +43,8 @@ def get_musical_summary(username):
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {
-                    "role": "system", 
-                    "content": (
-                        "You are a professional Music Psychologist. Analyze the following musical tags "
-                        "using the Big Five (OCEAN) framework. Provide a structured, supportive report."
-                    )
-                },
-                {"role": "user", "content": f"Analyze these musical patterns: {tag_string}"}
+                {"role": "system", "content": "You are a Music Psychologist. Analyze these tags using the Big Five (OCEAN) framework."},
+                {"role": "user", "content": f"Analyze these tags: {tag_string}"}
             ],
             temperature=0.7,
         )
