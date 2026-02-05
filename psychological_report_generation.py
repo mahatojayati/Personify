@@ -4,13 +4,13 @@ from openai import OpenAI
 from st_supabase_connection import SupabaseConnection
 
 # Initialize Supabase Connection
-# This uses the [connections.supabase] block from your secrets.toml
+# Uses [connections.supabase] from secrets.toml
 conn = st.connection("supabase", type=SupabaseConnection)
 
 def get_musical_summary(username):
-    """Main logic: Fetches Last.fm data, calls GitHub AI, and saves to Supabase."""
+    """Fetches music data, generates report via GitHub AI, and saves to Supabase."""
     try:
-        # 1. Last.fm Setup
+        # 1. Initialize Last.fm
         network = pylast.LastFMNetwork(
             api_key=st.secrets["LASTFM_API_KEY"],
             api_secret=st.secrets["LASTFM_API_SECRET"]
@@ -19,20 +19,22 @@ def get_musical_summary(username):
         top_tracks = user.get_top_tracks(limit=15)
         
         if not top_tracks:
-            return "No public listening history found. Check if the username is correct."
+            return "No public listening history found. Is the username correct?"
 
-        # 2. Extract Musical DNA (Tags)
+        # 2. Extract and count tags (The "Musical DNA")
         tag_counts = {}
         for item in top_tracks:
+            # item.item is the Track object; we fetch top tags for each track
             track_tags = item.item.get_top_tags(limit=3)
             for tag in track_tags:
                 name = tag.item.get_name().lower()
                 tag_counts[name] = tag_counts.get(name, 0) + 1
         
+        # Sort and format for the AI prompt
         sorted_tags = sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)
-        tag_string = ", ".join([f"{t} ({c})" for t, c in sorted_tags[:10]])
+        tag_string = ", ".join([f"{t} ({c})" for t, c in sorted_tags[:12]])
 
-        # 3. GitHub Models AI Call (OpenAI SDK)
+        # 3. GitHub Models AI Call (OpenAI SDK Compatible)
         client = OpenAI(
             base_url="https://models.inference.ai.azure.com",
             api_key=st.secrets["GITHUB_TOKEN"]
@@ -41,13 +43,20 @@ def get_musical_summary(username):
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are a Music Psychologist. Analyze these tags using the OCEAN framework."},
-                {"role": "user", "content": f"Analyze these tags: {tag_string}"}
-            ]
+                {
+                    "role": "system", 
+                    "content": (
+                        "You are a professional Music Psychologist. Analyze the following musical tags "
+                        "using the Big Five (OCEAN) framework. Provide a structured, supportive report."
+                    )
+                },
+                {"role": "user", "content": f"Analyze these musical patterns: {tag_string}"}
+            ],
+            temperature=0.7,
         )
         report = response.choices[0].message.content
 
-        # 4. Save to Supabase
+        # 4. Save finding to Supabase
         try:
             conn.table("musical_findings").insert({
                 "username": username,
@@ -63,9 +72,8 @@ def get_musical_summary(username):
         return f"❌ Error: {str(e)}"
 
 def get_recent_findings(limit=5):
-    """Fetches history from Supabase for the History tab."""
+    """Fetches history for the History tab."""
     try:
-        # Retrieves the latest records ordered by the ID
         response = conn.table("musical_findings").select("*").order("id", desc=True).limit(limit).execute()
         return response.data
     except Exception:
