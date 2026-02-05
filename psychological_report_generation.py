@@ -7,7 +7,6 @@ from st_supabase_connection import SupabaseConnection
 conn = st.connection("supabase", type=SupabaseConnection)
 
 def get_musical_summary(username):
-    """Fetches music data, generates a report via GitHub AI, and saves to Supabase."""
     try:
         # 1. Initialize Last.fm
         network = pylast.LastFMNetwork(
@@ -15,31 +14,34 @@ def get_musical_summary(username):
             api_secret=st.secrets["LASTFM_API_SECRET"]
         )
         user = network.get_user(username)
-        top_tracks = user.get_top_tracks(limit=5)
+        
+        # FAULT FIX: Increase limit to 20 for a better data sample
+        top_tracks = user.get_top_tracks(limit=20)
         
         if not top_tracks:
-            return "No public listening history found. Is the username correct and public?"
+            return "No public listening history found. Ensure the profile is public."
 
-        # 2. Extract and count tags (The "Musical DNA")
+        # 2. Extract and count tags
         tag_counts = {}
         for item in top_tracks:
-            # item.item is the pylast Track object
-            track_tags = item.item.get_top_tags(limit=3)
+            track_tags = item.item.get_top_tags(limit=5)
             for tag in track_tags:
                 name = tag.item.get_name().lower()
                 tag_counts[name] = tag_counts.get(name, 0) + 1
         
-        # Sort and format tags for the prompt
-        sorted_tags = sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)
-        tag_string = ", ".join([f"{t} ({c})" for t, c in sorted_tags[:12]])
+        # FAULT FIX: Check if we actually found any tags
+        if not tag_counts:
+            return "Your top tracks don't have enough genre tags for an analysis. Try a different user."
 
-        # 3. GitHub Models AI Call (OpenAI SDK)
+        sorted_tags = sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)
+        tag_string = ", ".join([f"{t} ({c})" for t, c in sorted_tags[:15]])
+
+        # 3. GitHub Models AI Call
         client = OpenAI(
             base_url="https://models.inference.ai.azure.com",
             api_key=st.secrets["GITHUB_TOKEN"]
         )
         
-        # We explicitly include the tag_string in the message
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
@@ -47,8 +49,8 @@ def get_musical_summary(username):
                     "role": "system", 
                     "content": (
                         "You are a professional Music Psychologist. Analyze the user's personality "
-                        "using the Big Five (OCEAN) framework based on their music tags. "
-                        "Structure your report clearly ."
+                        "strictly based on the provided musical tags using the OCEAN framework. "
+                        "Be specific, avoid generic advice, and provide quantitative-style insights."
                     )
                 },
                 {"role": "user", "content": f"Analyze these musical patterns and tags: {tag_string}"}
@@ -71,11 +73,3 @@ def get_musical_summary(username):
 
     except Exception as e:
         return f"❌ Error: {str(e)}"
-
-def get_recent_findings(limit=5):
-    """Fetches history for the History tab."""
-    try:
-        response = conn.table("musical_findings").select("*").order("id", desc=True).limit(limit).execute()
-        return response.data
-    except Exception:
-        return []
