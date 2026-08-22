@@ -1,0 +1,8 @@
+{
+  "name": "Personify",
+  "description": "Musical Psychology Mirror analyzing Spotify listening habits and artist DNA to generate OCEAN Big Five personality profiles with Gemini.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

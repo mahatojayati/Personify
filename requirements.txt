@@ -1,4 +1,0 @@
-streamlit
-pylast
-openai
-st-supabase-connection
