@@ -296,52 +296,56 @@ Key Tracks/Context: ${tracksStr}
 Identifier: @${data.identifier}`;
 
   if (process.env.GEMINI_API_KEY) {
-    try {
-      const ai = getGemini();
-      const response = await ai.models.generateContent({
-        model: "gemini-3.7-flash",
-        contents: `${systemInstruction}\n\n${prompt}`,
-      });
+    const candidateModels = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-3.7-flash"];
+    for (const modelName of candidateModels) {
+      try {
+        const ai = getGemini();
+        const response = await ai.models.generateContent({
+          model: modelName,
+          contents: `${systemInstruction}\n\n${prompt}`,
+        });
 
-      const rawText = response.text || "";
-      if (rawText) {
-        // Extract JSON_SCORES if present
-        let parsedScores = { openness: 75, conscientiousness: 65, extraversion: 60, agreeableness: 70, neuroticism: 45 };
-        let parsedArchetype = "The Sonic Explorer";
+        const rawText = response.text || "";
+        if (rawText) {
+          // Extract JSON_SCORES if present
+          let parsedScores = { openness: 75, conscientiousness: 65, extraversion: 60, agreeableness: 70, neuroticism: 45 };
+          let parsedArchetype = "The Sonic Explorer";
 
-        const jsonMatch = rawText.match(/JSON_SCORES:\s*(\{[\s\S]*?\})/);
-        let cleanedReport = rawText;
-        if (jsonMatch) {
-          try {
-            const parsed = JSON.parse(jsonMatch[1]);
-            parsedScores = {
-              openness: Number(parsed.openness) || 75,
-              conscientiousness: Number(parsed.conscientiousness) || 65,
-              extraversion: Number(parsed.extraversion) || 60,
-              agreeableness: Number(parsed.agreeableness) || 70,
-              neuroticism: Number(parsed.neuroticism) || 45,
-            };
-            if (parsed.archetype) parsedArchetype = parsed.archetype;
-            cleanedReport = rawText.replace(/JSON_SCORES:\s*\{[\s\S]*?\}/, "").trim();
-          } catch {
-            // Keep defaults
+          const jsonMatch = rawText.match(/JSON_SCORES:\s*(\{[\s\S]*?\})/);
+          let cleanedReport = rawText;
+          if (jsonMatch) {
+            try {
+              const parsed = JSON.parse(jsonMatch[1]);
+              parsedScores = {
+                openness: Number(parsed.openness) || 75,
+                conscientiousness: Number(parsed.conscientiousness) || 65,
+                extraversion: Number(parsed.extraversion) || 60,
+                agreeableness: Number(parsed.agreeableness) || 70,
+                neuroticism: Number(parsed.neuroticism) || 45,
+              };
+              if (parsed.archetype) parsedArchetype = parsed.archetype;
+              cleanedReport = rawText.replace(/JSON_SCORES:\s*\{[\s\S]*?\}/, "").trim();
+            } catch {
+              // Keep defaults
+            }
           }
-        }
 
-        // Check if archetype header exists
-        const archetypeMatch = cleanedReport.match(/#### \*\*Musical Archetype:\s*([^\*]+)\*\*/i);
-        if (archetypeMatch && archetypeMatch[1]) {
-          parsedArchetype = archetypeMatch[1].trim();
-        }
+          // Check if archetype header exists
+          const archetypeMatch = cleanedReport.match(/#### \*\*Musical Archetype:\s*([^\*]+)\*\*/i);
+          if (archetypeMatch && archetypeMatch[1]) {
+            parsedArchetype = archetypeMatch[1].trim();
+          }
 
-        return {
-          report: cleanedReport,
-          scores: parsedScores,
-          archetype: parsedArchetype,
-        };
+          return {
+            report: cleanedReport,
+            scores: parsedScores,
+            archetype: parsedArchetype,
+          };
+        }
+      } catch (err: unknown) {
+        const errMsg = err instanceof Error ? err.message : String(err);
+        console.warn(`Model ${modelName} call failed (${errMsg}), trying next available model...`);
       }
-    } catch (err: unknown) {
-      console.warn("Gemini 3.7 Flash generation failed, falling back to local psychological engine:", err);
     }
   }
 

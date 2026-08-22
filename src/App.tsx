@@ -232,17 +232,6 @@ export default function App() {
               Musical Psychology Mirror: Uncovering Big Five (OCEAN) personality traits from your Spotify audio DNA.
             </p>
           </div>
-
-          {/* Quick Connect Spotify Button */}
-          <button
-            id="connect-spotify-btn"
-            onClick={handleConnectSpotify}
-            disabled={loading}
-            className="self-start sm:self-auto flex items-center gap-2 px-4 py-2 bg-[#1DB954] hover:bg-[#1ed760] active:bg-[#1aa34a] text-black font-semibold text-xs rounded-full transition-colors shadow-sm cursor-pointer disabled:opacity-50"
-          >
-            <Radio className="w-3.5 h-3.5" />
-            Connect Spotify Account
-          </button>
         </header>
 
         {/* Tab Navigation */}
